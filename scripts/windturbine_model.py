@@ -205,8 +205,6 @@ def main():
     viz = VizMarkerPublisher(world=world, node=node)
     time.sleep(1)
 
-    print("Markers should now appear in RViz2 on topic /viz_marker")
-
 
 if __name__ == "__main__":
     main()
