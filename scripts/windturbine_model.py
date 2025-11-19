@@ -21,7 +21,7 @@ def loading_environment():
     world = World()
 
     white = Color(1, 1, 1)
-    red = Color(1, 0, 0)
+    red = Color(1, 1, 0)
     black = Color(0, 0, 0)
     gray = Color(0.74, 0.74, 0.74)
     wood = Color(1, 0.827, 0.6078)
