@@ -101,7 +101,7 @@ def main():
     nacelle = Nacelle(nacelle_body)
 
     # =====================================================================
-    # Rotor Blade 1
+    # Rotor Blade 1 (left)
     # =====================================================================
     body4 = Box(scale=Scale(0.2, 0.2, 1.5), color=white)
     visual = ShapeCollection([body4])
@@ -118,7 +118,7 @@ def main():
     rotorblade1 = RotorBlades(blade1)
 
     # =====================================================================
-    # Rotor Blade 2
+    # Rotor Blade 2 (right)
     # =====================================================================
     body5 = Box(scale=Scale(0.2, 0.2, 1.5), color=white)
     visual = ShapeCollection([body5])
