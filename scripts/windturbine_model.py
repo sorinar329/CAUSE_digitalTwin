@@ -81,7 +81,7 @@ def main():
     root_C_body1 = FixedConnection(
         parent=base_body,
         child=tower_body,
-        parent_T_connection_expression=TransformationMatrix.from_xyz_rpy(x=0, y=-0, z=1.8)
+        parent_T_connection_expression=TransformationMatrix.from_xyz_rpy(x=0, y=-0, z=1.6)
     )
     tower = Tower(tower_body)
 
