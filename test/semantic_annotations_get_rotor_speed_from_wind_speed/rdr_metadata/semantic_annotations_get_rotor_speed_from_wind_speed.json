@@ -1,0 +1,51 @@
+{
+    "_type": "ripple_down_rules.rdr.GeneralRDR",
+    "start_rules": {
+        "output_": {
+            "_type": "ripple_down_rules.rdr.SingleClassRDR",
+            "start_rule": {
+                "_type": "ripple_down_rules.rules.SingleClassRule",
+                "conditions": {
+                    "_type": "ripple_down_rules.datastructures.callable_expression.CallableExpression",
+                    "user_input": "def _get_value(case):\n    def conditions_for_get_rotor_speed_from_wind_speed(wind_speed: float, **kwargs) -> bool:\n        \"\"\"Get conditions on whether it's possible to conclude a value for get_rotor_speed_from_wind_speed.output_  of type .\"\"\"\n        return True\n    return conditions_for_get_rotor_speed_from_wind_speed(**case)\n    ",
+                    "conclusion_type": [
+                        "builtins.bool"
+                    ],
+                    "scope": {},
+                    "conclusion": {
+                        "_type": "builtins.NoneType",
+                        "value": null
+                    },
+                    "mutually_exclusive": true
+                },
+                "conclusion": {
+                    "_type": "ripple_down_rules.datastructures.callable_expression.CallableExpression",
+                    "user_input": "def _get_value(case):\n    def get_rotor_speed_from_wind_speed(wind_speed: float, **kwargs) -> float:\n        \"\"\"Get possible value(s) for get_rotor_speed_from_wind_speed.output_  of type .\"\"\"\n        if wind_speed >= 13:\n            return 11.1\n        elif wind_speed < 2:\n            return 0.0\n        else:\n            return 10.0\n    return get_rotor_speed_from_wind_speed(**case)\n    ",
+                    "conclusion_type": [
+                        "builtins.float"
+                    ],
+                    "scope": {},
+                    "conclusion": {
+                        "_type": "builtins.NoneType",
+                        "value": null
+                    },
+                    "mutually_exclusive": true
+                },
+                "parent": null,
+                "conclusion_name": "output_",
+                "weight": "",
+                "uid": "99648325048930205296105700669502885039",
+                "refinement": null,
+                "alternative": null
+            },
+            "generated_python_file_name": "get_rotor_speed_from_wind_speed_output__scrdr",
+            "name": "output_",
+            "case_type": "typing.Dict",
+            "case_name": "get_rotor_speed_from_wind_speed"
+        }
+    },
+    "generated_python_file_name": "get_rotor_speed_from_wind_speed_rdr",
+    "name": "output_",
+    "case_type": "typing.Dict",
+    "case_name": "get_rotor_speed_from_wind_speed"
+}
