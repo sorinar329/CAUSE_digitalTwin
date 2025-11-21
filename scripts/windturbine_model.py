@@ -95,8 +95,9 @@ def main():
         rotor_blade_dof.lower_limits.position = 1.606
         world.add_degree_of_freedom(rotor_blade_dof)
 
-        wind_speed = DegreeOfFreedom(name=PrefixedName('wind_speed'))
-        world.add_degree_of_freedom(wind_speed)
+        # commented out, because the world doesn't like DoFs that are not linked to a connection
+        # wind_speed = DegreeOfFreedom(name=PrefixedName('wind_speed'))
+        # world.add_degree_of_freedom(wind_speed)
 
         # =====================================================================
         # Tower Base
@@ -244,10 +245,9 @@ def main():
     dt = 0.05
     world.state[rotor_blade_dof.name].position = 0.5
 
-    expr = 2 * wind_speed.variables.velocity * rotor_blade_dof.variables.position
+    # expr = 2 * wind_speed.variables.velocity * rotor_blade_dof.variables.position
     while True:
-        world.apply_control_commands(np.array([0.0, 1.0, 1.0]), dt, Derivatives.velocity)
-        print(expr.evaluate())
+        world.apply_control_commands(np.array([0.0, 1.0]), dt, Derivatives.velocity)
         sleep(0.1)
 
 
