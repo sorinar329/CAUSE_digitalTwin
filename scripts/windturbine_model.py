@@ -8,10 +8,10 @@ from time import sleep
 
 import numpy as np
 import rclpy
-from semantic_digital_twin.adapters.viz_marker import VizMarkerPublisher
+from semantic_digital_twin.adapters.ros.visualization.viz_marker import VizMarkerPublisher
 from semantic_digital_twin.datastructures.prefixed_name import PrefixedName
+from semantic_digital_twin.spatial_types import HomogeneousTransformationMatrix
 from semantic_digital_twin.spatial_types.derivatives import Derivatives
-from semantic_digital_twin.spatial_types.spatial_types import TransformationMatrix
 from semantic_digital_twin.world import World
 from semantic_digital_twin.world_description.connections import FixedConnection, ActiveConnection, ActiveConnection1DOF, \
     HasUpdateState, RevoluteConnection
@@ -35,7 +35,7 @@ class WindTurbine(ActiveConnection1DOF, HasUpdateState):
     def add_to_world(self, world: World):
 
         self._connection_T_child_expression = (
-            cas.TransformationMatrix.from_xyz_axis_angle(
+            cas.HomogeneousTransformationMatrix.from_xyz_axis_angle(
                 axis=self.axis,
                 angle=0,
                 child_frame=self.child,
@@ -43,11 +43,11 @@ class WindTurbine(ActiveConnection1DOF, HasUpdateState):
         )
 
     def update_state(self, dt: float):
-        wind_vel = self._world.state[self.wind_dof.name].velocity
-        rotor_angle = self._world.state[self.rotor_dof.name].position
+        wind_vel = self._world.state[self.wind_dof.id].velocity
+        rotor_angle = self._world.state[self.rotor_dof.id].position
 
         self.rotor_dof.position = self.rotor_dof.position + dt
-        self._world.state[self.rotor_dof.name].velocity = wind_vel * rotor_angle
+        self._world.state[self.rotor_dof.id].velocity = wind_vel * rotor_angle
 
 
 def main():
@@ -91,8 +91,8 @@ def main():
         root = Body(name=PrefixedName("root"))
 
         rotor_blade_dof = DegreeOfFreedom(name=PrefixedName('rotor_blade'))
-        rotor_blade_dof.upper_limits.position = 0
-        rotor_blade_dof.lower_limits.position = 1.606
+        rotor_blade_dof.limits.upper.position = 0
+        rotor_blade_dof.limits.lower.position = 1.606
         world.add_degree_of_freedom(rotor_blade_dof)
 
         # commented out, because the world doesn't like DoFs that are not linked to a connection
@@ -110,9 +110,10 @@ def main():
         root_C_body2 = FixedConnection(
             parent=root,
             child=base_body,
-            parent_T_connection_expression=TransformationMatrix.from_xyz_rpy(x=0, y=-0, z=0.2)
+            parent_T_connection_expression=HomogeneousTransformationMatrix.from_xyz_rpy(x=0, y=-0, z=0.2)
         )
-        base = TowerBase(base_body)
+        base = TowerBase(root=base_body)
+        world.add_semantic_annotation(base)
 
         # =====================================================================
         # Tower
@@ -125,9 +126,10 @@ def main():
         root_C_body1 = FixedConnection(
             parent=base_body,
             child=tower_body,
-            parent_T_connection_expression=TransformationMatrix.from_xyz_rpy(x=0, y=-0, z=1.6)
+            parent_T_connection_expression=HomogeneousTransformationMatrix.from_xyz_rpy(x=0, y=-0, z=1.6)
         )
-        tower = Tower(tower_body)
+        tower = Tower(root=tower_body)
+        world.add_semantic_annotation(tower)
 
         # =====================================================================
         # Nacelle
@@ -142,9 +144,10 @@ def main():
             parent=tower_body,
             child=nacelle_body,
             axis=cas.Vector3.X(),
-            parent_T_connection_expression=TransformationMatrix.from_xyz_rpy(x=0.3, y=-0.0, z=1.4),
+            parent_T_connection_expression=HomogeneousTransformationMatrix.from_xyz_rpy(x=0.3, y=-0.0, z=1.4),
         )
-        nacelle = Nacelle(nacelle_body)
+        nacelle = Nacelle(root=nacelle_body)
+        world.add_semantic_annotation(nacelle)
 
         # =====================================================================
         # Rotor Blade 1 (left)
@@ -155,16 +158,17 @@ def main():
         collision = ShapeCollection([body4])
         blade1 = Body(name=PrefixedName("rotor_blade1"), visual=visual, collision=collision)
 
-        root_C_body4 = RevoluteConnection(
+        root_C_body4 = RevoluteConnection.create_with_dofs(
+            world=world,
             parent=nacelle_body,
             child=blade1,
-            parent_T_connection_expression=TransformationMatrix.from_xyz_rpy(
+            parent_T_connection_expression=HomogeneousTransformationMatrix.from_xyz_rpy(
                 x=0.10, y=-0.78, z=0.50, roll=1.0, pitch=0.0, yaw=0.0
             ),
-            dof_name=rotor_blade_dof.name,
             axis=cas.Vector3.Z()
         )
-        rotorblade1 = RotorBlades(blade1)
+        rotorblade1 = RotorBlades(root=blade1)
+        world.add_semantic_annotation(rotorblade1)
 
         # =====================================================================
         # Rotor Blade 2 (right)
@@ -174,16 +178,17 @@ def main():
         collision = ShapeCollection([body5])
         blade2 = Body(name=PrefixedName("rotor_blade2"), visual=visual, collision=collision)
 
-        root_C_body5 = RevoluteConnection(
+        root_C_body5 = RevoluteConnection.create_with_dofs(
+            world=world,
             parent=nacelle_body,
             child=blade2,
-            parent_T_connection_expression=TransformationMatrix.from_xyz_rpy(
+            parent_T_connection_expression=HomogeneousTransformationMatrix.from_xyz_rpy(
                 x=0.10, y=0.75, z=0.55, roll=2.2, pitch=0.0, yaw=0.0
             ),
-            dof_name = rotor_blade_dof.name,
             axis = cas.Vector3.Z(),
         )
-        rotorblade2 = RotorBlades(blade2)
+        rotorblade2 = RotorBlades(root=blade2)
+        world.add_semantic_annotation(rotorblade2)
 
         # =====================================================================
         # Rotor Blade 3 (Bottom)
@@ -193,16 +198,17 @@ def main():
         collision = ShapeCollection([body6])
         blade3 = Body(name=PrefixedName("rotor_blade3"), visual=visual, collision=collision)
 
-        root_C_body6 = RevoluteConnection(
+        root_C_body6 = RevoluteConnection.create_with_dofs(
+            world=world,
             parent=nacelle_body,
             child=blade3,
-            parent_T_connection_expression=TransformationMatrix.from_xyz_rpy(
+            parent_T_connection_expression=HomogeneousTransformationMatrix.from_xyz_rpy(
                 x=0.1, y=0.0, z=-0.85, roll=0.0, pitch=0.0, yaw=0.0
             ),
-            dof_name=rotor_blade_dof.name,
             axis=cas.Vector3.Z(),
         )
-        rotorblade3 = RotorBlades(blade3)
+        rotorblade3 = RotorBlades(root=blade3)
+        world.add_semantic_annotation(rotorblade3)
 
         # =====================================================================
         # Hub
@@ -215,9 +221,10 @@ def main():
         root_C_body7 = FixedConnection(
             parent=nacelle_body,
             child=hub_body,
-            parent_T_connection_expression=TransformationMatrix.from_xyz_rpy(x=0.30, y=-0.0, z=0.0)
+            parent_T_connection_expression=HomogeneousTransformationMatrix.from_xyz_rpy(x=0.30, y=-0.0, z=0.0)
         )
-        hub = Hub(hub_body)
+        hub = Hub(root=hub_body)
+        world.add_semantic_annotation(hub)
 
         # =====================================================================
         # Add Connections to the World
@@ -236,18 +243,19 @@ def main():
     # =====================================================================
     rclpy.init()
     node = rclpy.create_node("semantic_digital_twin")
-
+    viz = VizMarkerPublisher(_world=world, node=node)
+    viz.with_tf_publisher()
     # Spin ROS2 node in background thread
     thread = threading.Thread(target=rclpy.spin, args=(node,), daemon=True)
     thread.start()
 
-    viz = VizMarkerPublisher(world=world, node=node)
+
     dt = 0.05
-    world.state[rotor_blade_dof.name].position = 0.5
+    world.state[root_C_body3.dof_id].position = 0.5
 
     # expr = 2 * wind_speed.variables.velocity * rotor_blade_dof.variables.position
     while True:
-        world.apply_control_commands(np.array([0.0, 1.0]), dt, Derivatives.velocity)
+        world.apply_control_commands(np.array([1.0, 0.0, 0.0, 0.0]), dt, Derivatives.velocity)
         sleep(0.1)
 
 

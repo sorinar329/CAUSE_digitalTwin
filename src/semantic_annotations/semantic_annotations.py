@@ -1,28 +1,29 @@
 from dataclasses import dataclass, field
+
+from semantic_digital_twin.semantic_annotations.mixins import HasRootBody
 from semantic_digital_twin.world_description.world_entity import SemanticAnnotation, Body
 
 
 
 @dataclass(eq=False)
-class Tower(SemanticAnnotation):
-    body: Body
+class Tower(HasRootBody):
+    ...
 
 
 @dataclass(eq=False)
-class RotorBlades(SemanticAnnotation):
-    body: Body
+class RotorBlades(HasRootBody):
+    ...
 
 
 @dataclass(eq=False)
-class TowerBase(SemanticAnnotation):
-    body: Body
+class TowerBase(HasRootBody):
+    ...
 
 
 @dataclass(eq=False)
-class Nacelle(SemanticAnnotation):
-    body: Body
-
+class Nacelle(HasRootBody):
+    ...
 
 @dataclass(eq=False)
-class Hub(SemanticAnnotation):
-    body: Body
+class Hub(HasRootBody):
+    ...
